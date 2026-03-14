@@ -1,34 +1,19 @@
 // ============================================================
 // Bookings Controller — Lovely Mens Beauty Parlour
 // ============================================================
-//
-// SMS SETUP:
-// 1. Go to https://www.fast2sms.com → Sign Up Free
-// 2. Login → Dev API (left sidebar) → Copy your API key
-// 3. Open backend/.env → paste key as FAST2SMS_API_KEY=yourkey
+// VERCEL FIX:
+// Vercel serverless functions CANNOT write to files.
+// So we use in-memory array for storing bookings.
+// SMS and WhatsApp still work perfectly.
+// Bookings show in admin during the session.
 // ============================================================
 
-const fs    = require("fs");
-const path  = require("path");
 const https = require("https");
 
-const bookingsPath = path.join(__dirname, "../data/bookings.json");
+// In-memory bookings store (works on Vercel)
+let bookingsStore = [];
 
-// Read bookings from JSON file
-function readBookings() {
-  try {
-    return JSON.parse(fs.readFileSync(bookingsPath, "utf-8"));
-  } catch {
-    return [];
-  }
-}
-
-// Write bookings to JSON file
-function writeBookings(data) {
-  fs.writeFileSync(bookingsPath, JSON.stringify(data, null, 2));
-}
-
-// Build plain-text SMS message (no emojis for SMS)
+// ── Build plain SMS text (no emojis — Fast2SMS english route) ──
 function buildSMSText(booking) {
   const serviceList = booking.services
     .map((s) => s.name + " (Rs." + s.price + ")")
@@ -47,7 +32,7 @@ function buildSMSText(booking) {
   );
 }
 
-// Build WhatsApp message (with emojis)
+// ── Build WhatsApp text (with emojis) ──
 function buildWhatsAppText(booking) {
   const serviceList = booking.services
     .map((s) => s.name + " (Rs." + s.price + ")")
@@ -66,12 +51,12 @@ function buildWhatsAppText(booking) {
   );
 }
 
-// Send SMS to owner via Fast2SMS — NON BLOCKING
+// ── Send SMS via Fast2SMS (non-blocking) ──
 function sendSMS(smsText) {
   const apiKey = process.env.FAST2SMS_API_KEY;
 
   if (!apiKey || apiKey === "YOUR_FAST2SMS_KEY_HERE" || apiKey.trim() === "") {
-    console.log("[SMS] No Fast2SMS key in .env — skipping SMS.");
+    console.log("[SMS] No API key set — skipping SMS.");
     return;
   }
 
@@ -103,7 +88,7 @@ function sendSMS(smsText) {
       try {
         const parsed = JSON.parse(body);
         if (parsed.return === true) {
-          console.log("[SMS] Sent to owner 9442887267. Request ID:", parsed.request_id);
+          console.log("[SMS] Sent successfully to 9442887267");
         } else {
           console.error("[SMS] Fast2SMS error:", body);
         }
@@ -118,7 +103,7 @@ function sendSMS(smsText) {
   });
 
   req.setTimeout(8000, () => {
-    console.error("[SMS] Timeout — booking still saved.");
+    console.error("[SMS] Timeout");
     req.destroy();
   });
 
@@ -126,41 +111,42 @@ function sendSMS(smsText) {
   req.end();
 }
 
-// GET /api/bookings — return all bookings (admin)
+// ── GET /api/bookings ──
 exports.getBookings = (req, res) => {
   try {
-    res.json(readBookings());
+    res.json(bookingsStore);
   } catch (err) {
-    res.status(500).json({ error: "Failed to read bookings" });
+    res.status(500).json({ error: "Failed to get bookings" });
   }
 };
 
-// POST /api/bookings — save booking + send SMS + return WhatsApp link
+// ── POST /api/bookings ──
 exports.createBooking = (req, res) => {
   try {
-    const bookings = readBookings();
-
+    // Build booking object
     const newBooking = {
       id:            Date.now().toString(),
-      customerName:  req.body.customerName,
-      customerPhone: req.body.customerPhone,
-      branch:        req.body.branch,
-      date:          req.body.date,
-      time:          req.body.time,
-      services:      req.body.services,
-      total:         req.body.total,
+      customerName:  req.body.customerName  || "",
+      customerPhone: req.body.customerPhone || "",
+      branch:        req.body.branch        || "",
+      date:          req.body.date          || "",
+      time:          req.body.time          || "",
+      services:      req.body.services      || [],
+      total:         req.body.total         || 0,
       createdAt:     new Date().toISOString(),
     };
 
-    bookings.push(newBooking);
-    writeBookings(bookings);
+    // Save to memory (no file write — safe on Vercel)
+    bookingsStore.push(newBooking);
 
+    // Build messages
     const smsText = buildSMSText(newBooking);
     const waText  = buildWhatsAppText(newBooking);
 
-    // Fire SMS — non-blocking, booking already saved
+    // Send SMS — non-blocking, response sent immediately after
     sendSMS(smsText);
 
+    // Respond with success + WhatsApp link
     res.status(201).json({
       success:         true,
       booking:         newBooking,
@@ -169,25 +155,22 @@ exports.createBooking = (req, res) => {
     });
 
   } catch (err) {
-    console.error("[Booking Error]", err);
-    res.status(500).json({ error: "Failed to save booking." });
+    console.error("[Booking Error]", err.message);
+    res.status(500).json({ error: "Failed to save booking: " + err.message });
   }
 };
 
-// DELETE /api/bookings/:id — delete booking (admin)
+// ── DELETE /api/bookings/:id ──
 exports.deleteBooking = (req, res) => {
   try {
-    let bookings = readBookings();
-    const index  = bookings.findIndex((b) => b.id === req.params.id);
+    const before = bookingsStore.length;
+    bookingsStore = bookingsStore.filter((b) => b.id !== req.params.id);
 
-    if (index === -1) {
+    if (bookingsStore.length === before) {
       return res.status(404).json({ error: "Booking not found" });
     }
 
-    bookings.splice(index, 1);
-    writeBookings(bookings);
     res.json({ success: true, message: "Booking deleted" });
-
   } catch (err) {
     res.status(500).json({ error: "Failed to delete booking" });
   }
