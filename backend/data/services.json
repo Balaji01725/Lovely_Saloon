@@ -1,0 +1,16 @@
+[
+  { "id": 1, "name": "Shaving", "price": 60, "minPrice": 60, "maxPrice": 60, "description": "Classic clean shave with premium razor and aftershave care", "icon": "✂️", "category": "shaving" },
+  { "id": 2, "name": "Hair Cut (Child)", "price": 80, "minPrice": 80, "maxPrice": 80, "description": "Gentle, stylish haircut for children under 12", "icon": "👦", "category": "haircut" },
+  { "id": 3, "name": "Hair Cut (18+)", "price": 100, "minPrice": 100, "maxPrice": 100, "description": "Modern styled haircut with wash and finish for adults", "icon": "💈", "category": "haircut" },
+  { "id": 4, "name": "Shaving + Haircut", "price": 140, "minPrice": 140, "maxPrice": 140, "description": "Combo deal — full shave and haircut in one session", "icon": "🪒", "category": "combo" },
+  { "id": 5, "name": "Trim + Haircut", "price": 140, "minPrice": 140, "maxPrice": 140, "description": "Trim and shape with a fresh haircut — clean look guaranteed", "icon": "✂️", "category": "combo" },
+  { "id": 6, "name": "Facial for Gents", "price": 800, "minPrice": 800, "maxPrice": 2000, "description": "Deep cleansing gents facial with premium products (₹800–₹2000)", "icon": "🧖", "category": "facial" },
+  { "id": 7, "name": "Head Massage", "price": 100, "minPrice": 100, "maxPrice": 100, "description": "Relaxing traditional head massage with therapeutic oils", "icon": "💆", "category": "massage" },
+  { "id": 8, "name": "Beard Setting + Haircut", "price": 150, "minPrice": 150, "maxPrice": 150, "description": "Precision beard styling and shaping with a fresh haircut", "icon": "🧔", "category": "beard" },
+  { "id": 9, "name": "Face Massage", "price": 200, "minPrice": 200, "maxPrice": 200, "description": "Revitalizing face massage for skin tone and relaxation", "icon": "😌", "category": "massage" },
+  { "id": 10, "name": "Hair Straightening", "price": 1500, "minPrice": 1500, "maxPrice": 1500, "description": "Professional permanent hair straightening treatment", "icon": "💫", "category": "treatment" },
+  { "id": 11, "name": "Hair Smoothing", "price": 1000, "minPrice": 1000, "maxPrice": 1000, "description": "Smooth, frizz-free hair with keratin smoothing treatment", "icon": "✨", "category": "treatment" },
+  { "id": 12, "name": "Hair Spa", "price": 500, "minPrice": 500, "maxPrice": 500, "description": "Deep conditioning hair spa for nourishment and shine", "icon": "🌿", "category": "spa" },
+  { "id": 13, "name": "Hair Coloring", "price": 400, "minPrice": 400, "maxPrice": 2000, "description": "Professional hair coloring in any shade (₹400–₹2000)", "icon": "🎨", "category": "coloring" },
+  { "id": 14, "name": "Hair Curling", "price": 1000, "minPrice": 1000, "maxPrice": 1000, "description": "Stylish curls and waves with professional curling treatment", "icon": "🌀", "category": "treatment" }
+]

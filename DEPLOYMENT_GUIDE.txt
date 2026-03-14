@@ -1,0 +1,188 @@
+# 🚀 Lovely Mens Beauty Parlour — Deployment Guide
+# Deploy FREE on Render (Backend) + Netlify (Frontend)
+
+==========================================================
+TOTAL TIME: ~20 minutes | COST: FREE
+==========================================================
+
+## WHAT YOU NEED FIRST
+- A free GitHub account → https://github.com
+- A free Render account → https://render.com
+- A free Netlify account → https://netlify.com
+- Your Fast2SMS API key → https://fast2sms.com
+
+==========================================================
+## PART 1 — UPLOAD PROJECT TO GITHUB
+==========================================================
+
+STEP 1: Go to https://github.com → Sign in → Click "New" (green button)
+STEP 2: Repository name: lovely-salon
+STEP 3: Set to "Public" → Click "Create repository"
+STEP 4: On your computer, open VS Code terminal in the lovely-salon folder:
+
+    cd lovely-salon
+
+    # If git is not set up yet:
+    git init
+    git add .
+    git commit -m "Lovely Salon website"
+    git branch -M main
+    git remote add origin https://github.com/YOUR_USERNAME/lovely-salon.git
+    git push -u origin main
+
+⚠️  IMPORTANT: Before pushing, make sure backend/.env is in .gitignore
+    (It already is in this project — your API key stays safe)
+
+==========================================================
+## PART 2 — DEPLOY BACKEND ON RENDER (Free)
+==========================================================
+
+STEP 1: Go to https://render.com → Sign in with GitHub
+
+STEP 2: Click "New +" → Select "Web Service"
+
+STEP 3: Connect your GitHub repo "lovely-salon"
+
+STEP 4: Fill in these settings:
+    Name:           lovely-salon-backend
+    Root Directory: backend
+    Runtime:        Node
+    Build Command:  npm install
+    Start Command:  node server.js
+    Instance Type:  Free
+
+STEP 5: Scroll down to "Environment Variables" section
+        Click "Add Environment Variable":
+
+    Key:    FAST2SMS_API_KEY
+    Value:  (paste your Fast2SMS key here)
+
+    Key:    PORT
+    Value:  5000
+
+STEP 6: Click "Create Web Service"
+
+STEP 7: Wait 2-3 minutes while it builds and deploys
+
+STEP 8: Copy your backend URL — it looks like:
+        https://lovely-salon-backend.onrender.com
+
+        ✅ SAVE THIS URL — you need it for the frontend!
+
+==========================================================
+## PART 3 — UPDATE FRONTEND WITH YOUR BACKEND URL
+==========================================================
+
+STEP 1: In your project, create this file:
+        frontend/.env
+
+        Contents:
+        REACT_APP_API_URL=https://lovely-salon-backend.onrender.com
+
+        (Replace with your actual Render URL from Part 2 Step 8)
+
+STEP 2: Save the file and commit to GitHub:
+
+    git add frontend/.env
+    git commit -m "Add backend URL for production"
+    git push
+
+==========================================================
+## PART 4 — DEPLOY FRONTEND ON NETLIFY (Free)
+==========================================================
+
+OPTION A — Deploy via GitHub (Recommended, auto-updates):
+
+STEP 1: Go to https://netlify.com → Sign in with GitHub
+
+STEP 2: Click "Add new site" → "Import an existing project"
+
+STEP 3: Click "GitHub" → Select your "lovely-salon" repo
+
+STEP 4: Fill in these settings:
+    Base directory:   frontend
+    Build command:    npm run build
+    Publish directory: frontend/build
+
+STEP 5: Click "Show advanced" → Add environment variable:
+    Key:    REACT_APP_API_URL
+    Value:  https://lovely-salon-backend.onrender.com
+
+STEP 6: Click "Deploy site"
+
+STEP 7: Wait 3-5 minutes for build to finish
+
+STEP 8: Your site is live at something like:
+        https://lovely-salon-abc123.netlify.app
+
+STEP 9: (Optional) Click "Domain settings" → "Add custom domain"
+        to use your own domain like www.lovelysalon.com
+
+
+OPTION B — Drag & Drop Deploy (Fastest, no GitHub needed):
+
+STEP 1: On your computer, open terminal in the frontend folder:
+    cd lovely-salon/frontend
+    npm install
+    npm run build
+
+STEP 2: This creates a "build" folder inside frontend/
+
+STEP 3: Go to https://netlify.com → Sign in
+
+STEP 4: Drag the entire "build" folder onto the Netlify dashboard
+
+STEP 5: Site is instantly live! ✅
+
+==========================================================
+## PART 5 — FINAL STEPS AFTER DEPLOYMENT
+==========================================================
+
+1. Test your live website URL in browser
+2. Go to /services → Add a service to cart
+3. Fill in booking form → Click Confirm
+4. Check that WhatsApp message opens correctly
+5. Check phone 9442887267 for SMS (if Fast2SMS key is set)
+6. Go to /admin → Login with 9442887267 → Check bookings
+
+==========================================================
+## YOUR LIVE URLS (fill in after deployment)
+==========================================================
+
+Backend API:   https://______________________.onrender.com
+Frontend Site: https://______________________.netlify.app
+
+==========================================================
+## TROUBLESHOOTING
+==========================================================
+
+Problem: Frontend shows "Could not connect to server"
+Fix:     Check REACT_APP_API_URL in Netlify environment variables
+         Make sure it matches your Render backend URL exactly
+
+Problem: Backend on Render goes to sleep after 15 mins (free tier)
+Fix:     First request after sleep takes ~30 seconds to wake up
+         Upgrade to Render paid plan ($7/month) to keep it awake
+         OR use Railway.app free tier which stays awake longer
+
+Problem: SMS not sending
+Fix:     Check FAST2SMS_API_KEY in Render environment variables
+         Make sure the key is correct from fast2sms.com
+
+Problem: Images not showing
+Fix:     Make sure logo.png and owner.png are in frontend/public/
+         They should already be included in your ZIP
+
+==========================================================
+## ALTERNATIVE FREE HOSTS
+==========================================================
+
+Backend alternatives (instead of Render):
+  - Railway.app    → https://railway.app  (free $5 credit/month)
+  - Cyclic.sh      → https://cyclic.sh   (free tier available)
+
+Frontend alternatives (instead of Netlify):
+  - Vercel         → https://vercel.com  (very fast, free)
+  - GitHub Pages   → https://pages.github.com (free, static only)
+
+==========================================================

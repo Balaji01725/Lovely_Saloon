@@ -1,0 +1,217 @@
+.about-page { padding-top: 72px; }
+
+.page-header {
+  padding: 80px 20px 60px;
+  text-align: center;
+  background: linear-gradient(180deg, #080808, #0d0d0d);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+}
+
+.page-header h1 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  margin: 10px 0;
+}
+
+.page-header p {
+  color: rgba(245, 240, 232, 0.65);
+  font-size: 1rem;
+  margin-top: 14px;
+}
+
+/* Owner */
+.about-owner { padding: 90px 20px; background: #0a0a0a; }
+
+.about-owner-inner {
+  display: flex;
+  gap: 80px;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.about-img-wrap { position: relative; flex-shrink: 0; }
+
+.about-owner-photo {
+  width: 320px;
+  height: 380px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 3px solid rgba(201, 168, 76, 0.4);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(201,168,76,0.1);
+}
+
+.about-owner-placeholder {
+  width: 320px;
+  height: 380px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  border: 3px solid rgba(201, 168, 76, 0.3);
+  align-items: center;
+  justify-content: center;
+  font-size: 8rem;
+}
+
+.about-owner-experience {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  background: linear-gradient(135deg, #a07830, #c9a84c);
+  color: #000;
+  border-radius: 12px;
+  padding: 16px 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+}
+
+.exp-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.exp-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.about-owner-text h2 {
+  font-size: 2.2rem;
+}
+
+.about-owner-text p {
+  font-size: 0.88rem;
+  color: rgba(245, 240, 232, 0.72);
+  line-height: 1.8;
+}
+
+.about-owner-text strong { color: #c9a84c; }
+
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(201,168,76,0.15);
+}
+
+.stat-item { text-align: center; }
+
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #c9a84c;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: rgba(245,240,232,0.5);
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Timeline */
+.timeline-section { padding: 90px 20px; background: #080808; }
+
+.timeline {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(201,168,76,0.4), transparent);
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+  gap: 24px;
+}
+
+.timeline-item.left { flex-direction: row; }
+.timeline-item.right { flex-direction: row-reverse; }
+
+.timeline-year {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #c9a84c;
+  min-width: 60px;
+  text-align: center;
+}
+
+.timeline-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a07830, #c9a84c);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px rgba(201,168,76,0.15);
+  z-index: 1;
+}
+
+.timeline-card {
+  flex: 1;
+  background: linear-gradient(145deg, #1a1a1a, #222);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 0.85rem;
+  color: rgba(245,240,232,0.75);
+  line-height: 1.6;
+}
+
+/* Values */
+.values-section { padding: 90px 20px; background: #0a0a0a; }
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.value-card {
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.value-icon { font-size: 2.2rem; margin-bottom: 16px; }
+
+.value-card h3 {
+  font-size: 1.1rem;
+  color: #c9a84c;
+  margin-bottom: 10px;
+}
+
+.value-card p {
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.6);
+  line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+  .about-owner-inner { flex-direction: column; text-align: center; gap: 60px; }
+  .about-stats { grid-template-columns: repeat(2, 1fr); }
+  .values-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .timeline::before { left: 20px; }
+  .timeline-item, .timeline-item.right { flex-direction: row; }
+  .timeline-year { display: none; }
+  .values-grid { grid-template-columns: 1fr; }
+  .about-owner-photo, .about-owner-placeholder { width: 100%; height: 260px; }
+}

@@ -1,0 +1,71 @@
+.contact-page { padding-top: 72px; }
+.contact-section { padding: 80px 20px; background: #080808; }
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+.contact-cards { display: flex; flex-direction: column; gap: 20px; }
+
+.contact-card { padding: 28px 24px; }
+.contact-icon { font-size: 2rem; margin-bottom: 12px; }
+.contact-card h3 { font-size: 1.05rem; color: #c9a84c; margin-bottom: 8px; }
+.contact-main { font-size: 1.1rem; font-weight: 600; color: #fff; }
+.contact-sub { font-size: 0.8rem; color: rgba(245,240,232,0.5); margin-top: 4px; }
+.contact-action-btn { display: inline-block; margin-top: 14px; font-size: 0.78rem !important; padding: 8px 20px !important; }
+
+.contact-branches h2 { font-size: 1.8rem; }
+
+.location-card {
+  background: linear-gradient(145deg, #111, #1a1a1a);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.location-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 40px;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.location-badge.ac { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
+.location-badge.nonac { background: rgba(201,168,76,0.1); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
+
+.location-card h3 { font-size: 1.1rem; color: #fff; margin-bottom: 4px; }
+.location-card p { font-size: 0.82rem; color: rgba(245,240,232,0.55); }
+
+.map-link { display: inline-block; margin-top: 12px; font-size: 0.8rem; color: #c9a84c; text-decoration: none; transition: opacity 0.2s; }
+.map-link:hover { opacity: 0.7; }
+
+.hours-box {
+  background: rgba(201,168,76,0.05);
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 20px;
+}
+
+.hours-box h4 { font-size: 0.9rem; color: #c9a84c; margin-bottom: 12px; }
+
+.hours-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.6);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(201,168,76,0.07);
+}
+
+.hours-time { color: rgba(245,240,232,0.85); font-weight: 600; }
+
+@media (max-width: 768px) {
+  .contact-grid { grid-template-columns: 1fr; }
+}

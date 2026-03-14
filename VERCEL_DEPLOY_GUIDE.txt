@@ -1,0 +1,222 @@
+================================================================
+  LOVELY MENS BEAUTY PARLOUR — VERCEL DEPLOYMENT GUIDE
+  Step-by-step. Simple. Free.
+================================================================
+
+OVERVIEW
+--------
+You will create 2 GitHub repos → deploy 2 Vercel projects:
+  1. Backend  (Node.js API)  → gets a Vercel URL like: https://lovely-salon-api.vercel.app
+  2. Frontend (React)        → gets a Vercel URL like: https://lovely-salon.vercel.app
+
+Total time: ~15 minutes
+Cost: FREE
+
+================================================================
+PART 1 — SETUP GITHUB (skip if you already have an account)
+================================================================
+
+1. Go to https://github.com
+2. Click "Sign up" — create a free account
+3. Verify your email
+
+================================================================
+PART 2 — UPLOAD BACKEND TO GITHUB
+================================================================
+
+STEP 1: Create a new GitHub repository for the backend
+  • Go to https://github.com/new
+  • Repository name: lovely-salon-backend
+  • Select: Public
+  • DO NOT check "Add README"
+  • Click "Create repository"
+
+STEP 2: Upload backend files
+  • On the new repo page, click "uploading an existing file"
+     (OR click "Add file" → "Upload files")
+  • Open your computer's file explorer
+  • Navigate to: lovely-salon / backend /
+  • Select ALL these files and folders:
+      ✅ controllers/    (whole folder)
+      ✅ data/           (whole folder)
+      ✅ routes/         (whole folder)
+      ✅ server.js
+      ✅ package.json
+      ✅ vercel.json
+      ✅ .gitignore
+      ❌ DO NOT upload: .env       ← keep this private!
+      ❌ DO NOT upload: node_modules/
+
+  • Scroll down → click "Commit changes"
+
+================================================================
+PART 3 — DEPLOY BACKEND ON VERCEL
+================================================================
+
+STEP 1: Go to https://vercel.com → Sign up with GitHub
+
+STEP 2: Click "Add New..." → "Project"
+
+STEP 3: Find "lovely-salon-backend" → click "Import"
+
+STEP 4: Settings page — fill in:
+  • Framework Preset: Other
+  • Root Directory:   ./    (leave as default)
+  • Build Command:    (leave empty)
+  • Output Directory: (leave empty)
+  • Install Command:  npm install
+
+STEP 5: ADD ENVIRONMENT VARIABLES (very important!)
+  • Click "Environment Variables" section
+  • Add these one by one:
+
+    Key:    FAST2SMS_API_KEY
+    Value:  (paste your Fast2SMS key here)
+            How to get key: fast2sms.com → Login → Dev API → Copy key
+
+    Key:    NODE_ENV
+    Value:  production
+
+  • Click "Add" after each one
+
+STEP 6: Click "Deploy"
+
+STEP 7: Wait 1-2 minutes → deployment finishes
+
+STEP 8: COPY YOUR BACKEND URL
+  • It looks like: https://lovely-salon-backend-abc123.vercel.app
+  • Click the URL to test → you should see:
+    {"message":"Lovely Mens Beauty Parlour API is running!"}
+  • SAVE THIS URL — you need it in Part 5!
+
+================================================================
+PART 4 — UPLOAD FRONTEND TO GITHUB
+================================================================
+
+STEP 1: Create a new GitHub repository for the frontend
+  • Go to https://github.com/new
+  • Repository name: lovely-salon-frontend
+  • Select: Public
+  • DO NOT check "Add README"
+  • Click "Create repository"
+
+STEP 2: Upload frontend files
+  • Click "uploading an existing file"
+  • Open your computer's file explorer
+  • Navigate to: lovely-salon / frontend /
+  • Select ALL these files and folders:
+      ✅ public/         (whole folder — includes logo.png and owner.png)
+      ✅ src/            (whole folder)
+      ✅ package.json
+      ✅ vercel.json
+      ✅ .gitignore
+      ❌ DO NOT upload: node_modules/
+      ❌ DO NOT upload: build/
+
+  • Scroll down → click "Commit changes"
+
+================================================================
+PART 5 — DEPLOY FRONTEND ON VERCEL
+================================================================
+
+STEP 1: Go to https://vercel.com → Dashboard → click "Add New..." → "Project"
+
+STEP 2: Find "lovely-salon-frontend" → click "Import"
+
+STEP 3: Settings page — fill in:
+  • Framework Preset: Create React App
+  • Root Directory:   ./    (leave as default)
+  • Build Command:    npm run build
+  • Output Directory: build
+
+STEP 4: ADD ENVIRONMENT VARIABLE (very important!)
+  • Click "Environment Variables" section
+  • Add this:
+
+    Key:    REACT_APP_API_URL
+    Value:  https://lovely-salon-backend-abc123.vercel.app
+            ↑ REPLACE with YOUR actual backend URL from Part 3 Step 8
+            ↑ NO trailing slash at the end
+
+STEP 5: Click "Deploy"
+
+STEP 6: Wait 2-3 minutes for the React build to finish
+
+STEP 7: YOUR WEBSITE IS LIVE! 🎉
+  • Click the URL shown — it looks like:
+    https://lovely-salon-frontend-abc123.vercel.app
+  • Test it: Go to Services → Add to Cart → Book → Confirm
+  • Owner should receive an SMS on 9442887267
+
+================================================================
+PART 6 — GIVE YOUR SITE A CUSTOM NAME (optional)
+================================================================
+
+On your frontend Vercel project:
+  1. Go to "Settings" tab
+  2. Click "Domains"
+  3. You can change the Vercel subdomain to something like:
+     lovely-salon.vercel.app
+
+Or add your own domain (e.g. www.lovelysalon.com):
+  1. Buy a domain from GoDaddy / Namecheap
+  2. In Vercel Domains → "Add Domain" → enter your domain
+  3. Follow the DNS instructions Vercel gives you
+
+================================================================
+TROUBLESHOOTING
+================================================================
+
+PROBLEM: Website loads but shows "Could not connect to server"
+FIX:
+  • Check REACT_APP_API_URL in frontend Vercel environment variables
+  • Make sure the URL has no trailing slash
+  • Make sure backend is deployed and working
+  • Re-deploy frontend after fixing the env variable
+
+PROBLEM: SMS not being sent
+FIX:
+  • Check FAST2SMS_API_KEY in backend Vercel environment variables
+  • Go to fast2sms.com → check your account has credits
+  • Check Vercel backend logs: Vercel → your project → "Logs" tab
+
+PROBLEM: Bookings not saving (on Vercel free plan)
+FIX:
+  • Vercel serverless functions don't have permanent file storage
+  • Bookings save to memory temporarily (reset on redeploy)
+  • For permanent storage: use MongoDB Atlas free tier
+  • For now: bookings still trigger SMS + WhatsApp fine ✅
+
+PROBLEM: Page shows blank / white screen
+FIX:
+  • Make sure vercel.json is uploaded in the frontend folder
+  • Re-deploy the frontend
+
+PROBLEM: "Functions exceeded" error on Vercel
+FIX:
+  • You're on the free plan — just wait a moment and retry
+  • Free plan gives 100GB bandwidth + unlimited deploys
+
+================================================================
+AFTER DEPLOYMENT — CHECKLIST
+================================================================
+
+□ Backend URL works → shows API running message
+□ Frontend loads correctly with logo and owner photo
+□ Services page shows all 14 services
+□ Can add services to cart
+□ Booking form works — fills in name, phone, date, time
+□ After confirming — sees "SMS Sent to Owner" message
+□ WhatsApp button opens correct message to 9442887267
+□ Owner receives SMS on phone 9442887267
+□ Admin login works at /admin → phone 9442887267
+□ Admin dashboard shows bookings
+
+================================================================
+YOUR FINAL URLS (fill in after deployment)
+================================================================
+
+Backend API:   https://_____________________________.vercel.app
+Frontend Site: https://_____________________________.vercel.app
+
+================================================================

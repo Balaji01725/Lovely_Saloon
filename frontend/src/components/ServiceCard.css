@@ -1,0 +1,97 @@
+.service-card {
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 14px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.5), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.service-card:hover {
+  border-color: rgba(201, 168, 76, 0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(201, 168, 76, 0.15);
+}
+
+.service-card:hover::before {
+  opacity: 1;
+}
+
+.service-card-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.service-card-body {
+  flex: 1;
+}
+
+.service-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.service-desc {
+  font-size: 0.8rem;
+  color: rgba(245, 240, 232, 0.6);
+  line-height: 1.6;
+}
+
+.service-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(201, 168, 76, 0.12);
+}
+
+.service-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #c9a84c;
+}
+
+.add-cart-btn {
+  background: linear-gradient(135deg, #a07830, #c9a84c);
+  color: #000;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-cart-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(201, 168, 76, 0.4);
+}
+
+.add-cart-btn.in-cart {
+  background: rgba(201, 168, 76, 0.15);
+  color: #c9a84c;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  cursor: default;
+}
