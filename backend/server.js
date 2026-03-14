@@ -11,12 +11,17 @@ const servicesRouter = require("./routes/services");
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
-// Allow requests from any frontend origin (needed for Vercel)
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+// ── CORS — Allow ALL origins (fixes Vercel cross-origin errors) ──
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  // Handle preflight OPTIONS request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
 
 app.use(express.json());
 
@@ -28,7 +33,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Lovely Mens Beauty Parlour API is running!" });
 });
 
-// Only listen when running locally (not on Vercel)
+// Only listen locally (Vercel uses module.exports)
 if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
