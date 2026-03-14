@@ -265,3 +265,40 @@
 @media (max-width: 480px) {
   .logo-sub { display: none; }
 }
+
+/* Auth nav additions */
+.nav-dash-btn {
+  font-size: .72rem !important;
+  padding: 9px 16px !important;
+  border-radius: 6px;
+  text-decoration: none;
+}
+.nav-logout-btn {
+  background: rgba(239,68,68,.1);
+  border: 1px solid rgba(239,68,68,.2);
+  color: #f87171;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: .9rem;
+  transition: all .3s;
+}
+.nav-logout-btn:hover { background: rgba(239,68,68,.2); }
+.mobile-logout-btn {
+  background: rgba(239,68,68,.08);
+  border: none;
+  border-top: 1px solid rgba(239,68,68,.15);
+  color: #f87171;
+  font-family: 'Montserrat', sans-serif;
+  font-size: .85rem;
+  font-weight: 600;
+  padding: 13px 0;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  letter-spacing: .5px;
+}

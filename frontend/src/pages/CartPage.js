@@ -1,20 +1,9 @@
-// ============================================================
-// Cart / Booking Page
-// New Features:
-//   ✅ Slot blocking — Already Booked slots shown in red
-//   ✅ Slot auto-releases after appointment time
-//   ✅ Live slot availability checker
-//   ✅ Estimated wait time display
-//   ✅ Popular services badge
-//   ✅ SMS + WhatsApp on confirm
-// ============================================================
 import React, { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./CartPage.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-// Generate time slots 9 AM – 7 PM every 30 mins
 function generateTimeSlots() {
   const slots = [];
   for (let h = 9; h < 19; h++) {
@@ -31,6 +20,8 @@ function generateTimeSlots() {
 const ALL_SLOTS = generateTimeSlots();
 
 function CartPage({ cart, removeFromCart, clearCart }) {
+  const navigate = useNavigate();
+
   const [branch,        setBranch]        = useState("");
   const [date,          setDate]          = useState("");
   const [time,          setTime]          = useState("");
@@ -39,16 +30,21 @@ function CartPage({ cart, removeFromCart, clearCart }) {
   const [loading,       setLoading]       = useState(false);
   const [confirmation,  setConfirmation]  = useState(null);
   const [error,         setError]         = useState("");
-  const [bookedSlots,   setBookedSlots]   = useState([]);  // slots taken on selected branch+date
+  const [bookedSlots,   setBookedSlots]   = useState([]);
+  const [slotLimit,     setSlotLimit]     = useState(1);
   const [loadingSlots,  setLoadingSlots]  = useState(false);
 
-  const total   = cart.reduce((sum, i) => sum + i.price, 0);
-  const today   = new Date().toISOString().split("T")[0];
-
-  // Estimated duration (10 mins per service)
+  const total = cart.reduce((sum, i) => sum + i.price, 0);
+  const today = new Date().toISOString().split("T")[0];
   const estimatedMins = cart.length * 15;
 
-  // ── Fetch booked slots whenever branch or date changes ───
+  // Pre-fill name/phone from session
+  useEffect(() => {
+    const phone = localStorage.getItem("lmbp_phone") || "";
+    if (phone) setCustomerPhone(phone);
+  }, []);
+
+  // Fetch booked slots when branch or date changes
   const fetchBookedSlots = useCallback(async () => {
     if (!branch || !date) { setBookedSlots([]); return; }
     setLoadingSlots(true);
@@ -58,6 +54,7 @@ function CartPage({ cart, removeFromCart, clearCart }) {
       );
       const data = await res.json();
       setBookedSlots(data.bookedSlots || []);
+      setSlotLimit(data.slotLimit || 1);
     } catch {
       setBookedSlots([]);
     } finally {
@@ -67,34 +64,23 @@ function CartPage({ cart, removeFromCart, clearCart }) {
 
   useEffect(() => {
     fetchBookedSlots();
-    // Reset time if previously selected slot is now taken
     setTime("");
   }, [fetchBookedSlots]);
 
-  // ── How many slots are free ──────────────────────────────
-  const freeSlots = ALL_SLOTS.filter((s) => !bookedSlots.includes(s)).length;
+  const freeCount   = ALL_SLOTS.filter((s) => !bookedSlots.includes(s)).length;
+  const bookedCount = bookedSlots.length;
 
-  // ── Confirm Booking ──────────────────────────────────────
+  // Confirm booking
   const handleBooking = async () => {
-    if (cart.length === 0)
-      return setError("Please add at least one service to your cart.");
-    if (!branch)
-      return setError("Please select a branch.");
-    if (!date)
-      return setError("Please select an appointment date.");
-    if (!time)
-      return setError("Please select a time slot.");
-    if (!customerName.trim())
-      return setError("Please enter your full name.");
+    if (cart.length === 0)     return setError("Please add at least one service.");
+    if (!branch)               return setError("Please select a branch.");
+    if (!date)                 return setError("Please select an appointment date.");
+    if (!time)                 return setError("Please select a time slot.");
+    if (!customerName.trim())  return setError("Please enter your full name.");
     if (!/^[6-9]\d{9}$/.test(customerPhone))
       return setError("Please enter a valid 10-digit Indian mobile number.");
-
-    // Double-check slot not taken in UI
-    if (bookedSlots.includes(time)) {
-      return setError(
-        `${time} is already booked. Please choose another time slot.`
-      );
-    }
+    if (bookedSlots.includes(time))
+      return setError(`${time} is already fully booked. Please choose another slot.`);
 
     setError("");
     setLoading(true);
@@ -109,18 +95,16 @@ function CartPage({ cart, removeFromCart, clearCart }) {
           services: cart, total,
         }),
       });
-
       const data = await res.json();
 
       if (data.success) {
         setConfirmation(data);
         clearCart();
       } else if (data.slotTaken) {
-        // Slot was taken between page load and submit
         setError(data.error);
-        fetchBookedSlots(); // refresh slots immediately
+        fetchBookedSlots();
       } else {
-        setError("Booking failed. Please call us directly at 9442887267.");
+        setError("Booking failed. Please call us at 9442887267.");
       }
     } catch {
       setError("Cannot reach server. Please call 9442887267 or use WhatsApp.");
@@ -129,7 +113,7 @@ function CartPage({ cart, removeFromCart, clearCart }) {
     }
   };
 
-  // ── Confirmation screen ──────────────────────────────────
+  // ── Confirmation screen ────────────────────────────────
   if (confirmation) {
     return (
       <div className="cart-page">
@@ -138,31 +122,26 @@ function CartPage({ cart, removeFromCart, clearCart }) {
             <div className="confirm-check">✅</div>
             <h2>Booking Confirmed!</h2>
             <p className="confirm-sub">
-              An <strong>SMS has been sent</strong> to the owner automatically.
-              You can also send the booking via WhatsApp below.
+              SMS has been sent to the owner automatically.
+              Also send via WhatsApp below.
             </p>
 
-            {/* SMS sent notice */}
             <div className="sms-sent-notice">
               <span className="sms-icon">📱</span>
               <div>
                 <div className="sms-title">SMS Sent to Owner</div>
-                <div className="sms-desc">
-                  Owner (9442887267) has been notified via SMS automatically.
-                </div>
+                <div className="sms-desc">Owner (9442887267) notified via SMS automatically.</div>
               </div>
             </div>
 
-            {/* Booking summary card */}
             <div className="confirm-summary-card">
               <div className="cs-row"><span>👤 Customer</span><span>{confirmation.booking.customerName}</span></div>
-              <div className="cs-row"><span>🏢 Branch</span><span>{confirmation.booking.branch.split("—")[0]}</span></div>
+              <div className="cs-row"><span>🏢 Branch</span><span>{(confirmation.booking.branch || "").split("—")[0]}</span></div>
               <div className="cs-row"><span>📅 Date</span><span>{confirmation.booking.date}</span></div>
               <div className="cs-row"><span>⏰ Time</span><span>{confirmation.booking.time}</span></div>
               <div className="cs-row total-row"><span>💰 Total</span><span>₹{confirmation.booking.total}</span></div>
             </div>
 
-            {/* WhatsApp button */}
             <a
               href={confirmation.whatsappLink}
               target="_blank"
@@ -172,7 +151,6 @@ function CartPage({ cart, removeFromCart, clearCart }) {
               💬 Also Send via WhatsApp
             </a>
 
-            {/* Payment */}
             <div className="payment-section">
               <h3>💳 Pay Online (Optional)</h3>
               <p>Pay after your visit or send online before arriving</p>
@@ -186,19 +164,20 @@ function CartPage({ cart, removeFromCart, clearCart }) {
                   <div className="pay-number">9442887267</div>
                 </div>
               </div>
-              <p className="pay-note">💡 Cash payment also accepted at the shop</p>
+              <p className="pay-note">💡 Cash also accepted at the shop</p>
             </div>
 
-            <Link to="/" className="btn-outline" style={{ marginTop: "20px" }}>
-              ← Back to Home
-            </Link>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" }}>
+              <Link to="/dashboard" className="btn-primary">📋 View My Bookings</Link>
+              <Link to="/" className="btn-outline">← Home</Link>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // ── Main booking page ────────────────────────────────────
+  // ── Main cart ──────────────────────────────────────────
   return (
     <div className="cart-page">
       <div className="page-header">
@@ -211,7 +190,7 @@ function CartPage({ cart, removeFromCart, clearCart }) {
 
       <div className="cart-layout container">
 
-        {/* LEFT — Cart items */}
+        {/* LEFT */}
         <div className="cart-left">
           <h2 className="cart-section-title">🛒 Selected Services</h2>
 
@@ -231,60 +210,49 @@ function CartPage({ cart, removeFromCart, clearCart }) {
                     <div className="cart-item-desc">{item.description}</div>
                   </div>
                   <div className="cart-item-price">₹{item.price}</div>
-                  <button
-                    className="remove-btn"
-                    onClick={() => removeFromCart(item.id)}
-                    title="Remove"
-                  >✕</button>
+                  <button className="remove-btn" onClick={() => removeFromCart(item.id)}>✕</button>
                 </div>
               ))}
-
               <div className="cart-total">
                 <span>Total Amount</span>
                 <span className="total-amount">₹{total}</span>
               </div>
-
-              {/* Estimated duration */}
-              {cart.length > 0 && (
-                <div className="est-time">
-                  <span>⏱️</span>
-                  <span>Estimated duration: <strong>~{estimatedMins} mins</strong></span>
-                </div>
-              )}
+              <div className="est-time">
+                <span>⏱️</span>
+                <span>Estimated duration: <strong>~{estimatedMins} mins</strong></span>
+              </div>
             </div>
           )}
 
-          {/* Availability indicator */}
+          {/* Availability card */}
           {branch && date && (
             <div className="availability-card">
-              <div className="avail-header">📅 Slot Availability</div>
+              <div className="avail-header">
+                📅 Slot Availability — {slotLimit === 1 ? "AC Branch (1 per slot)" : "Non-AC Branch (2 per slot)"}
+              </div>
               {loadingSlots ? (
-                <div className="avail-loading">Checking slots...</div>
+                <div className="avail-loading">Checking availability...</div>
               ) : (
                 <>
                   <div className="avail-stats">
                     <div className="avail-stat free">
-                      <div className="avail-num">{freeSlots}</div>
+                      <div className="avail-num">{freeCount}</div>
                       <div className="avail-label">Available</div>
                     </div>
                     <div className="avail-stat taken">
-                      <div className="avail-num">{bookedSlots.length}</div>
+                      <div className="avail-num">{bookedCount}</div>
                       <div className="avail-label">Booked</div>
                     </div>
                     <div className="avail-stat total-slots">
                       <div className="avail-num">{ALL_SLOTS.length}</div>
-                      <div className="avail-label">Total Slots</div>
+                      <div className="avail-label">Total</div>
                     </div>
                   </div>
-                  {freeSlots <= 3 && freeSlots > 0 && (
-                    <div className="avail-warning">
-                      ⚡ Only {freeSlots} slots left — book fast!
-                    </div>
+                  {freeCount <= 3 && freeCount > 0 && (
+                    <div className="avail-warning">⚡ Only {freeCount} slots left — book fast!</div>
                   )}
-                  {freeSlots === 0 && (
-                    <div className="avail-full">
-                      😔 All slots are booked for this date. Please choose another date.
-                    </div>
+                  {freeCount === 0 && (
+                    <div className="avail-full">😔 All slots booked for this date. Please pick another date.</div>
                   )}
                 </>
               )}
@@ -292,7 +260,7 @@ function CartPage({ cart, removeFromCart, clearCart }) {
           )}
         </div>
 
-        {/* RIGHT — Booking form */}
+        {/* RIGHT */}
         <div className="cart-right">
           <h2 className="cart-section-title">📅 Appointment Details</h2>
 
@@ -300,32 +268,24 @@ function CartPage({ cart, removeFromCart, clearCart }) {
 
           <div className="booking-form">
 
-            {/* Branch */}
             <div className="form-group">
               <label>Select Branch *</label>
               <select value={branch} onChange={(e) => setBranch(e.target.value)}>
                 <option value="">-- Choose a Branch --</option>
                 <option value="AC Branch — 92/242, Mudalur Road, Sathankulam">
-                  ❄️ AC Branch — 92/242, Mudalur Road
+                  ❄️ AC Branch — 92/242, Mudalur Road (1 booking per slot)
                 </option>
                 <option value="Non-AC Branch — 92/241, Mudalur Road, Sathankulam">
-                  💪 Non-AC Branch — 92/241, Mudalur Road
+                  💪 Non-AC Branch — 92/241, Mudalur Road (2 bookings per slot)
                 </option>
               </select>
             </div>
 
-            {/* Date */}
             <div className="form-group">
               <label>Appointment Date *</label>
-              <input
-                type="date"
-                value={date}
-                min={today}
-                onChange={(e) => setDate(e.target.value)}
-              />
+              <input type="date" value={date} min={today} onChange={(e) => setDate(e.target.value)} />
             </div>
 
-            {/* Time Slots — with booked indicator */}
             <div className="form-group">
               <label>
                 Preferred Time Slot *
@@ -333,13 +293,11 @@ function CartPage({ cart, removeFromCart, clearCart }) {
               </label>
 
               {!branch || !date ? (
-                <div className="slot-hint">
-                  👆 Select a branch and date first to see available slots
-                </div>
+                <div className="slot-hint">👆 Select branch and date first to see available slots</div>
               ) : (
                 <div className="time-slots">
                   {ALL_SLOTS.map((slot) => {
-                    const isBooked  = bookedSlots.includes(slot);
+                    const isBooked   = bookedSlots.includes(slot);
                     const isSelected = time === slot;
                     return (
                       <button
@@ -348,33 +306,25 @@ function CartPage({ cart, removeFromCart, clearCart }) {
                         className={`time-slot ${isBooked ? "booked" : ""} ${isSelected ? "selected" : ""}`}
                         onClick={() => !isBooked && setTime(slot)}
                         disabled={isBooked}
-                        title={isBooked ? "Already booked" : "Click to select"}
+                        title={isBooked ? "Already fully booked" : "Click to select"}
                       >
                         {slot}
-                        {isBooked && <span className="booked-dot">●</span>}
+                        {isBooked && <span className="booked-label">Full</span>}
                       </button>
                     );
                   })}
                 </div>
               )}
 
-              {/* Legend */}
               {branch && date && (
                 <div className="slot-legend">
-                  <span className="legend-item">
-                    <span className="legend-dot free-dot"></span> Available
-                  </span>
-                  <span className="legend-item">
-                    <span className="legend-dot sel-dot"></span> Selected
-                  </span>
-                  <span className="legend-item">
-                    <span className="legend-dot booked-dot-legend"></span> Already Booked
-                  </span>
+                  <span className="legend-item"><span className="legend-dot free-dot"></span>Available</span>
+                  <span className="legend-item"><span className="legend-dot sel-dot"></span>Selected</span>
+                  <span className="legend-item"><span className="legend-dot booked-dot-legend"></span>Fully Booked</span>
                 </div>
               )}
             </div>
 
-            {/* Name */}
             <div className="form-group">
               <label>Your Name *</label>
               <input
@@ -385,7 +335,6 @@ function CartPage({ cart, removeFromCart, clearCart }) {
               />
             </div>
 
-            {/* Phone */}
             <div className="form-group">
               <label>Mobile Number *</label>
               <input
@@ -393,31 +342,18 @@ function CartPage({ cart, removeFromCart, clearCart }) {
                 placeholder="10-digit mobile number"
                 value={customerPhone}
                 maxLength={10}
-                onChange={(e) =>
-                  setCustomerPhone(e.target.value.replace(/\D/, "").slice(0, 10))
-                }
+                onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/, "").slice(0, 10))}
               />
             </div>
 
-            {/* Summary */}
             {cart.length > 0 && (
               <div className="booking-summary">
-                <div className="summary-row">
-                  <span>Services Selected</span>
-                  <span>{cart.length}</span>
-                </div>
-                <div className="summary-row">
-                  <span>Estimated Duration</span>
-                  <span>~{estimatedMins} mins</span>
-                </div>
-                <div className="summary-row total-row">
-                  <span>Total Amount</span>
-                  <span>₹{total}</span>
-                </div>
+                <div className="summary-row"><span>Services Selected</span><span>{cart.length}</span></div>
+                <div className="summary-row"><span>Estimated Duration</span><span>~{estimatedMins} mins</span></div>
+                <div className="summary-row total-row"><span>Total Amount</span><span>₹{total}</span></div>
               </div>
             )}
 
-            {/* Submit */}
             <button
               className="btn-primary confirm-btn"
               onClick={handleBooking}
@@ -428,7 +364,6 @@ function CartPage({ cart, removeFromCart, clearCart }) {
 
             <p className="booking-note">
               📱 SMS is automatically sent to the owner when you confirm.
-              You can also send a WhatsApp message after booking.
             </p>
           </div>
         </div>
