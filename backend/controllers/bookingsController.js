@@ -1,24 +1,62 @@
 // ============================================================
 // Bookings Controller — Lovely Mens Beauty Parlour
-// ============================================================
-// VERCEL FIX:
-// Vercel serverless functions CANNOT write to files.
-// So we use in-memory array for storing bookings.
-// SMS and WhatsApp still work perfectly.
-// Bookings show in admin during the session.
+// Features:
+//   - Slot blocking: same date + time = "Already Booked"
+//   - Slot auto-releases after appointment time passes
+//   - SMS via Fast2SMS
+//   - WhatsApp link
 // ============================================================
 
 const https = require("https");
 
-// In-memory bookings store (works on Vercel)
+// In-memory store (Vercel serverless safe)
 let bookingsStore = [];
 
-// ── Build plain SMS text (no emojis — Fast2SMS english route) ──
+// ── Check if a slot is already booked ──────────────────────
+function isSlotTaken(branch, date, time) {
+  const now = new Date();
+  return bookingsStore.some((b) => {
+    // Skip past bookings — slot is free again after the time passes
+    const bookingDateTime = new Date(`${b.date} ${convertTo24(b.time)}`);
+    if (bookingDateTime < now) return false;
+    return b.branch === branch && b.date === date && b.time === time;
+  });
+}
+
+// Convert "10:30 AM" → "10:30" for Date parsing
+function convertTo24(timeStr) {
+  const [time, period] = timeStr.split(" ");
+  let [hours, minutes] = time.split(":").map(Number);
+  if (period === "PM" && hours !== 12) hours += 12;
+  if (period === "AM" && hours === 12) hours = 0;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+// ── Get all booked slots for a branch + date (for frontend) ──
+exports.getBookedSlots = (req, res) => {
+  const { branch, date } = req.query;
+  if (!branch || !date) return res.json({ bookedSlots: [] });
+
+  const now = new Date();
+  const booked = bookingsStore
+    .filter((b) => {
+      const bookingDateTime = new Date(`${b.date} ${convertTo24(b.time)}`);
+      return (
+        b.branch === branch &&
+        b.date === date &&
+        bookingDateTime >= now
+      );
+    })
+    .map((b) => b.time);
+
+  res.json({ bookedSlots: booked });
+};
+
+// ── Build SMS text ─────────────────────────────────────────
 function buildSMSText(booking) {
   const serviceList = booking.services
     .map((s) => s.name + " (Rs." + s.price + ")")
     .join(", ");
-
   return (
     "New Booking - Lovely Mens Beauty Parlour\n" +
     "Customer: " + booking.customerName + "\n" +
@@ -32,12 +70,11 @@ function buildSMSText(booking) {
   );
 }
 
-// ── Build WhatsApp text (with emojis) ──
+// ── Build WhatsApp text ────────────────────────────────────
 function buildWhatsAppText(booking) {
   const serviceList = booking.services
     .map((s) => s.name + " (Rs." + s.price + ")")
     .join(", ");
-
   return (
     "New Booking - Lovely Mens Beauty Parlour\n\n" +
     "Customer: " + booking.customerName + "\n" +
@@ -51,107 +88,80 @@ function buildWhatsAppText(booking) {
   );
 }
 
-// ── Send SMS via Fast2SMS (non-blocking) ──
+// ── Send SMS via Fast2SMS ──────────────────────────────────
 function sendSMS(smsText) {
   const apiKey = process.env.FAST2SMS_API_KEY;
-
   if (!apiKey || apiKey === "YOUR_FAST2SMS_KEY_HERE" || apiKey.trim() === "") {
-    console.log("[SMS] No API key set — skipping SMS.");
+    console.log("[SMS] No API key — skipping.");
     return;
   }
 
   const payload = JSON.stringify({
-    route:     "q",
-    sender_id: "FTSMS",
-    message:   smsText,
-    language:  "english",
-    flash:     0,
-    numbers:   "9442887267",
+    route: "q", sender_id: "FTSMS",
+    message: smsText, language: "english",
+    flash: 0, numbers: "9442887267",
   });
 
-  const options = {
-    hostname: "www.fast2sms.com",
-    path:     "/dev/bulkV2",
-    method:   "POST",
+  const req = https.request({
+    hostname: "www.fast2sms.com", path: "/dev/bulkV2", method: "POST",
     headers: {
-      "authorization":  apiKey,
-      "Content-Type":   "application/json",
-      "Content-Length": Buffer.byteLength(payload),
-      "Cache-Control":  "no-cache",
+      "authorization": apiKey, "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(payload), "Cache-Control": "no-cache",
     },
-  };
-
-  const req = https.request(options, (res) => {
+  }, (res) => {
     let body = "";
-    res.on("data", (chunk) => { body += chunk; });
+    res.on("data", (c) => body += c);
     res.on("end", () => {
       try {
-        const parsed = JSON.parse(body);
-        if (parsed.return === true) {
-          console.log("[SMS] Sent successfully to 9442887267");
-        } else {
-          console.error("[SMS] Fast2SMS error:", body);
-        }
-      } catch {
-        console.log("[SMS] Response:", body);
-      }
+        const p = JSON.parse(body);
+        console.log(p.return ? "[SMS] Sent OK" : "[SMS] Error: " + body);
+      } catch { console.log("[SMS]", body); }
     });
   });
 
-  req.on("error", (err) => {
-    console.error("[SMS] Failed (non-blocking):", err.message);
-  });
-
-  req.setTimeout(8000, () => {
-    console.error("[SMS] Timeout");
-    req.destroy();
-  });
-
+  req.on("error", (e) => console.error("[SMS] Failed:", e.message));
+  req.setTimeout(8000, () => { req.destroy(); });
   req.write(payload);
   req.end();
 }
 
-// ── GET /api/bookings ──
+// ── GET /api/bookings ──────────────────────────────────────
 exports.getBookings = (req, res) => {
-  try {
-    res.json(bookingsStore);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to get bookings" });
-  }
+  res.json(bookingsStore);
 };
 
-// ── POST /api/bookings ──
+// ── POST /api/bookings ─────────────────────────────────────
 exports.createBooking = (req, res) => {
   try {
-    // Build booking object
+    const { customerName, customerPhone, branch, date, time, services, total } = req.body;
+
+    // ✅ Check if slot already taken
+    if (isSlotTaken(branch, date, time)) {
+      return res.status(409).json({
+        success: false,
+        slotTaken: true,
+        error: `This time slot (${time} on ${date}) is already booked at ${branch}. Please choose a different time.`,
+      });
+    }
+
     const newBooking = {
-      id:            Date.now().toString(),
-      customerName:  req.body.customerName  || "",
-      customerPhone: req.body.customerPhone || "",
-      branch:        req.body.branch        || "",
-      date:          req.body.date          || "",
-      time:          req.body.time          || "",
-      services:      req.body.services      || [],
-      total:         req.body.total         || 0,
-      createdAt:     new Date().toISOString(),
+      id: Date.now().toString(),
+      customerName, customerPhone, branch, date, time,
+      services: services || [], total: total || 0,
+      createdAt: new Date().toISOString(),
     };
 
-    // Save to memory (no file write — safe on Vercel)
     bookingsStore.push(newBooking);
 
-    // Build messages
     const smsText = buildSMSText(newBooking);
     const waText  = buildWhatsAppText(newBooking);
 
-    // Send SMS — non-blocking, response sent immediately after
     sendSMS(smsText);
 
-    // Respond with success + WhatsApp link
     res.status(201).json({
-      success:         true,
-      booking:         newBooking,
+      success: true, booking: newBooking,
       whatsappMessage: waText,
-      whatsappLink:    "https://wa.me/919442887267?text=" + encodeURIComponent(waText),
+      whatsappLink: "https://wa.me/919442887267?text=" + encodeURIComponent(waText),
     });
 
   } catch (err) {
@@ -160,17 +170,14 @@ exports.createBooking = (req, res) => {
   }
 };
 
-// ── DELETE /api/bookings/:id ──
+// ── DELETE /api/bookings/:id ───────────────────────────────
 exports.deleteBooking = (req, res) => {
   try {
     const before = bookingsStore.length;
     bookingsStore = bookingsStore.filter((b) => b.id !== req.params.id);
-
-    if (bookingsStore.length === before) {
+    if (bookingsStore.length === before)
       return res.status(404).json({ error: "Booking not found" });
-    }
-
-    res.json({ success: true, message: "Booking deleted" });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete booking" });
   }

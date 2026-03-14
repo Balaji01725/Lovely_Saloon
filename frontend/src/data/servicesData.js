@@ -1,6 +1,6 @@
 // =============================================
 // SERVICES DATA — Built into frontend
-// Services always load even if backend is down
+// Always loads even if backend is offline
 // =============================================
 
 const SERVICES_DATA = [
@@ -36,11 +36,11 @@ const SERVICES_DATA = [
   },
   {
     id: 4,
-    name: "Shaving + Haircut",
-    price: 140,
-    minPrice: 140,
-    maxPrice: 140,
-    description: "Combo deal — full shave and haircut in one session",
+    name: "Haircut + Shaving",
+    price: 150,           // ← updated price
+    minPrice: 150,
+    maxPrice: 150,
+    description: "Best combo — fresh haircut plus a clean professional shave",
     icon: "🪒",
     category: "combo",
   },
