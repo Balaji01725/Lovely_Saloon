@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./CartPage.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -20,8 +20,6 @@ function generateTimeSlots() {
 const ALL_SLOTS = generateTimeSlots();
 
 function CartPage({ cart, removeFromCart, clearCart }) {
-  const navigate = useNavigate();
-
   const [branch,        setBranch]        = useState("");
   const [date,          setDate]          = useState("");
   const [time,          setTime]          = useState("");
@@ -34,17 +32,15 @@ function CartPage({ cart, removeFromCart, clearCart }) {
   const [slotLimit,     setSlotLimit]     = useState(1);
   const [loadingSlots,  setLoadingSlots]  = useState(false);
 
-  const total = cart.reduce((sum, i) => sum + i.price, 0);
-  const today = new Date().toISOString().split("T")[0];
+  const total         = cart.reduce((sum, i) => sum + i.price, 0);
+  const today         = new Date().toISOString().split("T")[0];
   const estimatedMins = cart.length * 15;
 
-  // Pre-fill name/phone from session
   useEffect(() => {
     const phone = localStorage.getItem("lmbp_phone") || "";
     if (phone) setCustomerPhone(phone);
   }, []);
 
-  // Fetch booked slots when branch or date changes
   const fetchBookedSlots = useCallback(async () => {
     if (!branch || !date) { setBookedSlots([]); return; }
     setLoadingSlots(true);
@@ -55,28 +51,20 @@ function CartPage({ cart, removeFromCart, clearCart }) {
       const data = await res.json();
       setBookedSlots(data.bookedSlots || []);
       setSlotLimit(data.slotLimit || 1);
-    } catch {
-      setBookedSlots([]);
-    } finally {
-      setLoadingSlots(false);
-    }
+    } catch { setBookedSlots([]); }
+    finally { setLoadingSlots(false); }
   }, [branch, date]);
 
-  useEffect(() => {
-    fetchBookedSlots();
-    setTime("");
-  }, [fetchBookedSlots]);
+  useEffect(() => { fetchBookedSlots(); setTime(""); }, [fetchBookedSlots]);
 
   const freeCount   = ALL_SLOTS.filter((s) => !bookedSlots.includes(s)).length;
-  const bookedCount = bookedSlots.length;
 
-  // Confirm booking
   const handleBooking = async () => {
-    if (cart.length === 0)     return setError("Please add at least one service.");
-    if (!branch)               return setError("Please select a branch.");
-    if (!date)                 return setError("Please select an appointment date.");
-    if (!time)                 return setError("Please select a time slot.");
-    if (!customerName.trim())  return setError("Please enter your full name.");
+    if (cart.length === 0)    return setError("Please add at least one service.");
+    if (!branch)              return setError("Please select a branch.");
+    if (!date)                return setError("Please select a date.");
+    if (!time)                return setError("Please select a time slot.");
+    if (!customerName.trim()) return setError("Please enter your full name.");
     if (!/^[6-9]\d{9}$/.test(customerPhone))
       return setError("Please enter a valid 10-digit Indian mobile number.");
     if (bookedSlots.includes(time))
@@ -113,46 +101,58 @@ function CartPage({ cart, removeFromCart, clearCart }) {
     }
   };
 
-  // ── Confirmation screen ────────────────────────────────
+  // ── Confirmation screen ──────────────────────────────────
   if (confirmation) {
+    const svcList = (confirmation.booking.services || []).map((s) => `${s.name} (Rs.${s.price})`).join(", ");
+
     return (
       <div className="cart-page">
         <div className="container">
           <div className="confirmation-box">
-            <div className="confirm-check">✅</div>
+            <div className="confirm-check">🎉</div>
             <h2>Booking Confirmed!</h2>
             <p className="confirm-sub">
-              SMS has been sent to the owner automatically.
-              Also send via WhatsApp below.
+              Your appointment is all set. The owner has been notified.
             </p>
 
+            {/* SMS notice */}
             <div className="sms-sent-notice">
               <span className="sms-icon">📱</span>
               <div>
                 <div className="sms-title">SMS Sent to Owner</div>
-                <div className="sms-desc">Owner (9442887267) notified via SMS automatically.</div>
+                <div className="sms-desc">Owner (9442887267) notified automatically via SMS.</div>
               </div>
             </div>
 
+            {/* Booking summary */}
             <div className="confirm-summary-card">
-              <div className="cs-row"><span>👤 Customer</span><span>{confirmation.booking.customerName}</span></div>
+              <div className="cs-row"><span>👤 Name</span><span>{confirmation.booking.customerName}</span></div>
               <div className="cs-row"><span>🏢 Branch</span><span>{(confirmation.booking.branch || "").split("—")[0]}</span></div>
               <div className="cs-row"><span>📅 Date</span><span>{confirmation.booking.date}</span></div>
               <div className="cs-row"><span>⏰ Time</span><span>{confirmation.booking.time}</span></div>
+              <div className="cs-row"><span>✂️ Services</span><span>{(confirmation.booking.services || []).map(s => s.name).join(", ")}</span></div>
               <div className="cs-row total-row"><span>💰 Total</span><span>₹{confirmation.booking.total}</span></div>
             </div>
 
-            <a
-              href={confirmation.whatsappLink}
-              target="_blank"
-              rel="noreferrer"
-              className="btn-primary whatsapp-confirm-btn"
-            >
-              💬 Also Send via WhatsApp
-            </a>
+            {/* WhatsApp CTA — prominent */}
+            <div className="whatsapp-section">
+              <div className="wa-section-title">💬 Send to Owner via WhatsApp</div>
+              <p className="wa-section-sub">
+                Tap below to send your booking details directly to the owner on WhatsApp
+              </p>
+              <a
+                href={confirmation.whatsappLink}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-primary whatsapp-confirm-btn"
+              >
+                💬 Send via WhatsApp to Owner
+              </a>
+            </div>
 
+            {/* Payment */}
             <div className="payment-section">
-              <h3>💳 Pay Online (Optional)</h3>
+              <h3>💳 Payment Options</h3>
               <p>Pay after your visit or send online before arriving</p>
               <div className="payment-options">
                 <div className="payment-card gpay-card">
@@ -167,9 +167,9 @@ function CartPage({ cart, removeFromCart, clearCart }) {
               <p className="pay-note">💡 Cash also accepted at the shop</p>
             </div>
 
-            <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap", marginTop: "20px" }}>
+            <div style={{ display:"flex",gap:"12px",justifyContent:"center",flexWrap:"wrap",marginTop:"20px" }}>
               <Link to="/dashboard" className="btn-primary">📋 View My Bookings</Link>
-              <Link to="/" className="btn-outline">← Home</Link>
+              <Link to="/" className="btn-outline">← Back to Home</Link>
             </div>
           </div>
         </div>
@@ -224,11 +224,11 @@ function CartPage({ cart, removeFromCart, clearCart }) {
             </div>
           )}
 
-          {/* Availability card */}
+          {/* Availability */}
           {branch && date && (
             <div className="availability-card">
               <div className="avail-header">
-                📅 Slot Availability — {slotLimit === 1 ? "AC Branch (1 per slot)" : "Non-AC Branch (2 per slot)"}
+                📅 Availability — {slotLimit === 1 ? "AC: 1 per slot" : "Non-AC: 2 per slot"}
               </div>
               {loadingSlots ? (
                 <div className="avail-loading">Checking availability...</div>
@@ -240,7 +240,7 @@ function CartPage({ cart, removeFromCart, clearCart }) {
                       <div className="avail-label">Available</div>
                     </div>
                     <div className="avail-stat taken">
-                      <div className="avail-num">{bookedCount}</div>
+                      <div className="avail-num">{bookedSlots.length}</div>
                       <div className="avail-label">Booked</div>
                     </div>
                     <div className="avail-stat total-slots">
@@ -249,10 +249,10 @@ function CartPage({ cart, removeFromCart, clearCart }) {
                     </div>
                   </div>
                   {freeCount <= 3 && freeCount > 0 && (
-                    <div className="avail-warning">⚡ Only {freeCount} slots left — book fast!</div>
+                    <div className="avail-warning">⚡ Only {freeCount} slots left!</div>
                   )}
                   {freeCount === 0 && (
-                    <div className="avail-full">😔 All slots booked for this date. Please pick another date.</div>
+                    <div className="avail-full">😔 All slots booked. Please pick another date.</div>
                   )}
                 </>
               )}
@@ -267,16 +267,15 @@ function CartPage({ cart, removeFromCart, clearCart }) {
           {error && <div className="form-error">⚠️ {error}</div>}
 
           <div className="booking-form">
-
             <div className="form-group">
               <label>Select Branch *</label>
               <select value={branch} onChange={(e) => setBranch(e.target.value)}>
                 <option value="">-- Choose a Branch --</option>
                 <option value="AC Branch — 92/242, Mudalur Road, Sathankulam">
-                  ❄️ AC Branch — 92/242, Mudalur Road (1 booking per slot)
+                  ❄️ AC Branch — 92/242, Mudalur Road (1 booking/slot)
                 </option>
                 <option value="Non-AC Branch — 92/241, Mudalur Road, Sathankulam">
-                  💪 Non-AC Branch — 92/241, Mudalur Road (2 bookings per slot)
+                  💪 Non-AC Branch — 92/241, Mudalur Road (2 bookings/slot)
                 </option>
               </select>
             </div>
@@ -288,86 +287,69 @@ function CartPage({ cart, removeFromCart, clearCart }) {
 
             <div className="form-group">
               <label>
-                Preferred Time Slot *
+                Time Slot *
                 {loadingSlots && <span className="slot-checking"> ⏳ checking...</span>}
               </label>
-
               {!branch || !date ? (
-                <div className="slot-hint">👆 Select branch and date first to see available slots</div>
+                <div className="slot-hint">👆 Select branch and date first</div>
               ) : (
-                <div className="time-slots">
-                  {ALL_SLOTS.map((slot) => {
-                    const isBooked   = bookedSlots.includes(slot);
-                    const isSelected = time === slot;
-                    return (
-                      <button
-                        key={slot}
-                        type="button"
-                        className={`time-slot ${isBooked ? "booked" : ""} ${isSelected ? "selected" : ""}`}
-                        onClick={() => !isBooked && setTime(slot)}
-                        disabled={isBooked}
-                        title={isBooked ? "Already fully booked" : "Click to select"}
-                      >
-                        {slot}
-                        {isBooked && <span className="booked-label">Full</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {branch && date && (
-                <div className="slot-legend">
-                  <span className="legend-item"><span className="legend-dot free-dot"></span>Available</span>
-                  <span className="legend-item"><span className="legend-dot sel-dot"></span>Selected</span>
-                  <span className="legend-item"><span className="legend-dot booked-dot-legend"></span>Fully Booked</span>
-                </div>
+                <>
+                  <div className="time-slots">
+                    {ALL_SLOTS.map((slot) => {
+                      const isBooked   = bookedSlots.includes(slot);
+                      const isSelected = time === slot;
+                      return (
+                        <button key={slot} type="button"
+                          className={`time-slot ${isBooked ? "booked" : ""} ${isSelected ? "selected" : ""}`}
+                          onClick={() => !isBooked && setTime(slot)}
+                          disabled={isBooked}
+                        >
+                          {slot}
+                          {isBooked && <span className="booked-label">Full</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="slot-legend">
+                    <span className="legend-item"><span className="legend-dot free-dot"></span>Available</span>
+                    <span className="legend-item"><span className="legend-dot sel-dot"></span>Selected</span>
+                    <span className="legend-item"><span className="legend-dot booked-dot-legend"></span>Fully Booked</span>
+                  </div>
+                </>
               )}
             </div>
 
             <div className="form-group">
               <label>Your Name *</label>
-              <input
-                type="text"
-                placeholder="Enter your full name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-              />
+              <input type="text" placeholder="Enter your full name"
+                value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
             </div>
 
             <div className="form-group">
               <label>Mobile Number *</label>
-              <input
-                type="tel"
-                placeholder="10-digit mobile number"
-                value={customerPhone}
-                maxLength={10}
-                onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/, "").slice(0, 10))}
-              />
+              <input type="tel" placeholder="10-digit mobile number"
+                value={customerPhone} maxLength={10}
+                onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/, "").slice(0, 10))} />
             </div>
 
             {cart.length > 0 && (
               <div className="booking-summary">
-                <div className="summary-row"><span>Services Selected</span><span>{cart.length}</span></div>
-                <div className="summary-row"><span>Estimated Duration</span><span>~{estimatedMins} mins</span></div>
-                <div className="summary-row total-row"><span>Total Amount</span><span>₹{total}</span></div>
+                <div className="summary-row"><span>Services</span><span>{cart.length}</span></div>
+                <div className="summary-row"><span>Est. Duration</span><span>~{estimatedMins} mins</span></div>
+                <div className="summary-row total-row"><span>Total</span><span>₹{total}</span></div>
               </div>
             )}
 
-            <button
-              className="btn-primary confirm-btn"
-              onClick={handleBooking}
-              disabled={loading || cart.length === 0}
-            >
+            <button className="btn-primary confirm-btn" onClick={handleBooking}
+              disabled={loading || cart.length === 0}>
               {loading ? "⏳ Booking..." : "✅ Confirm Booking"}
             </button>
 
             <p className="booking-note">
-              📱 SMS is automatically sent to the owner when you confirm.
+              📱 SMS sent to owner automatically. You can also send WhatsApp after booking.
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -1,71 +1,101 @@
-.contact-page { padding-top: 72px; }
-.contact-section { padding: 80px 20px; background: #080808; }
+.cart-page { padding-top:72px;min-height:100vh;background:#080808 }
+.cart-layout { display:grid;grid-template-columns:1fr 1.2fr;gap:40px;padding:60px 20px 80px;align-items:flex-start }
+.cart-section-title { font-family:'Playfair Display',serif;font-size:1.3rem;color:#fff;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid rgba(201,168,76,.2) }
 
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: flex-start;
-}
+.empty-cart { text-align:center;padding:60px 20px;background:#111;border-radius:14px;border:1px dashed rgba(201,168,76,.2) }
+.empty-icon { font-size:3rem;margin-bottom:16px }
+.empty-cart p { color:rgba(245,240,232,.5);margin-bottom:24px }
 
-.contact-cards { display: flex; flex-direction: column; gap: 20px; }
+.cart-items { display:flex;flex-direction:column;gap:12px }
+.cart-item { display:flex;align-items:center;gap:14px;background:linear-gradient(145deg,#141414,#1e1e1e);border:1px solid rgba(201,168,76,.12);border-radius:10px;padding:14px 16px;transition:all .3s }
+.cart-item:hover { border-color:rgba(201,168,76,.25) }
+.cart-item-icon { font-size:1.5rem;flex-shrink:0 }
+.cart-item-info { flex:1 }
+.cart-item-name { font-weight:600;font-size:.9rem;color:#fff }
+.cart-item-desc { font-size:.75rem;color:rgba(245,240,232,.5);margin-top:3px }
+.cart-item-price { font-family:'Playfair Display',serif;font-size:1rem;color:#c9a84c;font-weight:700;flex-shrink:0 }
+.remove-btn { background:none;border:none;color:rgba(245,240,232,.3);font-size:.85rem;cursor:pointer;padding:4px 8px;transition:color .2s }
+.remove-btn:hover { color:#ef4444 }
+.cart-total { display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.25);border-radius:10px;margin-top:6px;font-weight:600;color:rgba(245,240,232,.7) }
+.total-amount { font-family:'Playfair Display',serif;font-size:1.4rem;color:#c9a84c;font-weight:700 }
+.est-time { display:flex;align-items:center;gap:8px;font-size:.8rem;color:rgba(245,240,232,.5);padding:10px 14px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.05) }
+.est-time strong { color:#c9a84c }
 
-.contact-card { padding: 28px 24px; }
-.contact-icon { font-size: 2rem; margin-bottom: 12px; }
-.contact-card h3 { font-size: 1.05rem; color: #c9a84c; margin-bottom: 8px; }
-.contact-main { font-size: 1.1rem; font-weight: 600; color: #fff; }
-.contact-sub { font-size: 0.8rem; color: rgba(245,240,232,0.5); margin-top: 4px; }
-.contact-action-btn { display: inline-block; margin-top: 14px; font-size: 0.78rem !important; padding: 8px 20px !important; }
+.availability-card { margin-top:20px;background:linear-gradient(145deg,#111,#181818);border:1px solid rgba(201,168,76,.2);border-radius:12px;overflow:hidden }
+.avail-header { background:rgba(201,168,76,.08);padding:12px 18px;font-size:.76rem;font-weight:700;color:#c9a84c;letter-spacing:.5px;border-bottom:1px solid rgba(201,168,76,.12) }
+.avail-loading { padding:16px 18px;font-size:.8rem;color:rgba(245,240,232,.4) }
+.avail-stats { display:flex;padding:16px 18px }
+.avail-stat { flex:1;text-align:center;padding:8px }
+.avail-stat+.avail-stat { border-left:1px solid rgba(255,255,255,.06) }
+.avail-num { font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700 }
+.avail-stat.free .avail-num { color:#4ade80 }
+.avail-stat.taken .avail-num { color:#f87171 }
+.avail-stat.total-slots .avail-num { color:#c9a84c }
+.avail-label { font-size:.68rem;color:rgba(245,240,232,.45);margin-top:3px;text-transform:uppercase;letter-spacing:.5px }
+.avail-warning { padding:10px 18px;background:rgba(251,191,36,.08);border-top:1px solid rgba(251,191,36,.15);font-size:.78rem;color:#fbbf24;font-weight:600 }
+.avail-full    { padding:10px 18px;background:rgba(239,68,68,.08);border-top:1px solid rgba(239,68,68,.15);font-size:.78rem;color:#f87171;font-weight:600 }
 
-.contact-branches h2 { font-size: 1.8rem; }
+.cart-right { background:linear-gradient(145deg,#111,#1a1a1a);border:1px solid rgba(201,168,76,.15);border-radius:16px;padding:36px 32px }
+.form-error { background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:12px 16px;font-size:.85rem;margin-bottom:20px }
+.booking-form { display:flex;flex-direction:column;gap:20px }
+.form-group { display:flex;flex-direction:column;gap:8px }
+.form-group label { font-size:.78rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(201,168,76,.75) }
+.slot-checking { font-size:.7rem;color:rgba(245,240,232,.4);font-weight:400;text-transform:none;letter-spacing:0 }
+.form-group input,.form-group select { background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:8px;color:#fff;font-family:'Montserrat',sans-serif;font-size:.88rem;padding:12px 16px;outline:none;transition:border-color .3s }
+.form-group input:focus,.form-group select:focus { border-color:rgba(201,168,76,.5);box-shadow:0 0 0 3px rgba(201,168,76,.08) }
+.form-group select option { background:#1a1a1a;color:#fff }
+.slot-hint { background:rgba(255,255,255,.03);border:1px dashed rgba(201,168,76,.15);border-radius:8px;padding:14px 16px;font-size:.8rem;color:rgba(245,240,232,.4);text-align:center }
+.time-slots { display:grid;grid-template-columns:repeat(4,1fr);gap:8px }
+.time-slot { background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.15);color:rgba(245,240,232,.65);font-family:'Montserrat',sans-serif;font-size:.68rem;font-weight:600;padding:8px 4px;border-radius:6px;cursor:pointer;transition:all .2s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px }
+.time-slot:hover:not(:disabled) { border-color:rgba(201,168,76,.4);color:#c9a84c }
+.time-slot.selected { background:linear-gradient(135deg,#a07830,#c9a84c);color:#000;border-color:transparent;font-weight:700 }
+.time-slot.booked { background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);color:rgba(248,113,113,.5);cursor:not-allowed;opacity:.7 }
+.booked-label { font-size:.55rem;color:#f87171;font-weight:700;letter-spacing:.5px;text-transform:uppercase }
+.slot-legend { display:flex;gap:16px;flex-wrap:wrap;margin-top:8px }
+.legend-item { display:flex;align-items:center;gap:5px;font-size:.7rem;color:rgba(245,240,232,.45) }
+.legend-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0 }
+.free-dot          { background:rgba(201,168,76,.5) }
+.sel-dot           { background:#c9a84c }
+.booked-dot-legend { background:rgba(239,68,68,.5) }
+.booking-summary { background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:16px 20px }
+.summary-row { display:flex;justify-content:space-between;font-size:.85rem;color:rgba(245,240,232,.65);padding:6px 0 }
+.total-row { border-top:1px solid rgba(201,168,76,.15);margin-top:8px;padding-top:12px;font-weight:700;color:#c9a84c;font-size:1rem }
+.confirm-btn { width:100%;justify-content:center;font-size:.9rem!important;padding:16px!important }
+.confirm-btn:disabled { opacity:.5;cursor:not-allowed;transform:none!important }
+.booking-note { font-size:.75rem;color:rgba(245,240,232,.4);line-height:1.6;text-align:center }
 
-.location-card {
-  background: linear-gradient(145deg, #111, #1a1a1a);
-  border: 1px solid rgba(201,168,76,0.15);
-  border-radius: 12px;
-  padding: 24px;
-}
+/* Confirmation */
+.confirmation-box { max-width:620px;margin:60px auto 80px;text-align:center;padding:0 20px }
+.confirm-check { font-size:4rem;margin-bottom:20px;animation:fadeInUp .5s ease }
+.confirmation-box h2 { font-size:2rem;color:#c9a84c;margin-bottom:10px }
+.confirm-sub { color:rgba(245,240,232,.6);margin-bottom:24px;font-size:.9rem }
+.sms-sent-notice { display:flex;align-items:flex-start;gap:14px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:16px 18px;margin-bottom:20px;text-align:left }
+.sms-icon  { font-size:1.6rem;flex-shrink:0 }
+.sms-title { font-weight:700;font-size:.88rem;color:#4ade80;margin-bottom:4px }
+.sms-desc  { font-size:.78rem;color:rgba(245,240,232,.6);line-height:1.5 }
+.confirm-summary-card { background:#111;border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:20px;margin-bottom:20px;text-align:left }
+.cs-row { display:flex;justify-content:space-between;font-size:.83rem;color:rgba(245,240,232,.7);padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04) }
+.cs-row:last-child { border-bottom:none }
+.cs-row.total-row { font-weight:700;color:#c9a84c;font-size:1rem;border-top:1px solid rgba(201,168,76,.15);border-bottom:none;padding-top:12px;margin-top:4px }
 
-.location-badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 40px;
-  margin-bottom: 12px;
-  letter-spacing: 0.5px;
-}
+/* WhatsApp section — prominent */
+.whatsapp-section { background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.2);border-radius:14px;padding:24px;margin-bottom:20px }
+.wa-section-title { font-family:'Playfair Display',serif;font-size:1.05rem;color:#25d366;margin-bottom:6px }
+.wa-section-sub { font-size:.8rem;color:rgba(245,240,232,.5);margin-bottom:16px;line-height:1.5 }
+.whatsapp-confirm-btn { width:100%;background:linear-gradient(135deg,#128c3e,#25d366)!important;font-size:.9rem!important;padding:15px!important }
 
-.location-badge.ac { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
-.location-badge.nonac { background: rgba(201,168,76,0.1); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); }
+.payment-section { background:#111;border:1px solid rgba(201,168,76,.15);border-radius:14px;padding:24px;margin:20px 0 }
+.payment-section h3 { font-size:1.1rem;margin-bottom:6px }
+.payment-section>p { font-size:.82rem;color:rgba(245,240,232,.55);margin-bottom:18px }
+.payment-options { display:flex;gap:14px;justify-content:center;margin-bottom:14px }
+.payment-card { flex:1;border-radius:12px;padding:18px;text-align:center }
+.gpay-card    { background:linear-gradient(135deg,#1a1f4b,#2d3580);border:1px solid rgba(66,133,244,.3) }
+.phonepe-card { background:linear-gradient(135deg,#200040,#3c0075);border:1px solid rgba(95,37,159,.4) }
+.pay-logo     { font-weight:800;font-size:1.1rem;margin-bottom:8px }
+.gpay-logo    { color:#4285f4 }
+.phonepe-logo { color:#8b5cf6 }
+.pay-number   { font-size:1.1rem;font-weight:700;color:#c9a84c }
+.pay-note     { font-size:.78rem;color:rgba(245,240,232,.45);margin-top:8px }
 
-.location-card h3 { font-size: 1.1rem; color: #fff; margin-bottom: 4px; }
-.location-card p { font-size: 0.82rem; color: rgba(245,240,232,0.55); }
-
-.map-link { display: inline-block; margin-top: 12px; font-size: 0.8rem; color: #c9a84c; text-decoration: none; transition: opacity 0.2s; }
-.map-link:hover { opacity: 0.7; }
-
-.hours-box {
-  background: rgba(201,168,76,0.05);
-  border: 1px solid rgba(201,168,76,0.12);
-  border-radius: 12px;
-  padding: 20px 24px;
-  margin-top: 20px;
-}
-
-.hours-box h4 { font-size: 0.9rem; color: #c9a84c; margin-bottom: 12px; }
-
-.hours-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.82rem;
-  color: rgba(245,240,232,0.6);
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(201,168,76,0.07);
-}
-
-.hours-time { color: rgba(245,240,232,0.85); font-weight: 600; }
-
-@media (max-width: 768px) {
-  .contact-grid { grid-template-columns: 1fr; }
-}
+@media (max-width:900px) { .cart-layout { grid-template-columns:1fr } }
+@media (max-width:480px) { .cart-right { padding:24px 18px } .time-slots { grid-template-columns:repeat(3,1fr) } .payment-options { flex-direction:column } }
